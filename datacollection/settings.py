@@ -37,11 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     # apps
     'core_data',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -55,6 +57,9 @@ ROOT_URLCONF = 'datacollection.urls'
 
 # Trust ngrok domains for webhook forwarding
 CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.app', 'https://*.ngrok.io']
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
 
 TEMPLATES = [
     {

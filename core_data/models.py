@@ -30,5 +30,21 @@ class Response_table(models.Model):
         verbose_name_plural = 'Response Tables'
         ordering = ['-id']
 
-    
+
+class New_User(models.Model):
+
+    name = models.CharField(max_length=200)
+    age = models.IntegerField()
+
+    class Meta:
+        verbose_name = ("user")
+        verbose_name_plural = ("users")
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse("_detail", kwargs={"pk": self.pk})
+
+
 

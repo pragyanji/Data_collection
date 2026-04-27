@@ -6,7 +6,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-from .models import User_Details, Response_table
+from .models import User_Details, Response_table, New_User
 
 logger = logging.getLogger(__name__)
 
@@ -107,3 +107,44 @@ def show_details(request):
     key = ['name', 'contact', 'gender', 'age','_submitted_by','family_no']
     print(responses)
     return render(request, 'show_details.html', {'responses': responses, 'keys': key})
+
+
+# api to create the user details in the database from the react js frontend
+@csrf_exempt
+def create_user(request):
+    data = json.loads(request.body)
+    user = New_User.objects.create(name=data['name'], age=data['age'])
+    return JsonResponse({'status': 'success', 'id': user.id}, status=201)
+
+@csrf_exempt
+def update_user(request, user_id):
+    if request.method != 'PUT':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+    try:
+        user = New_User.objects.get(id=user_id)
+    except New_User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': f'User with id {user_id} does not exist.'}, status=404)
+
+    data = json.loads(request.body)
+    user.name = data.get('name', user.name)
+    user.age = data.get('age', user.age)
+    user.save()
+    return JsonResponse({'status': 'success', 'message': f'User with id {user_id} updated.'}, status=200)
+
+# api to get the user details from the database and send it to the react js frontend
+def user_details(request):
+    users = New_User.objects.all().values('id', 'name', 'age')
+    # print(list(users))
+    return JsonResponse(list(users), safe=False, status=200)
+
+# api to delete the user details from the database and send it to the react js frontend
+@csrf_exempt
+def delete_user(request, user_id):
+    if request.method != 'DELETE':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+    try:
+        user = New_User.objects.get(id=user_id)
+        user.delete()
+        return JsonResponse({'status': 'success', 'message': f'User with id {user_id} deleted.'}, status=200)
+    except New_User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': f'User with id {user_id} does not exist.'}, status=404)

@@ -5,3 +5,4 @@ from .models import *
 # Register your models here.
 admin.site.register(User_Details)
 admin.site.register(Response_table)
+admin.site.register(New_User)
