@@ -13,4 +13,14 @@ urlpatterns = [
     path('api/user/details/', views.user_details, name='user_details'),
     path('api/user/delete/<int:user_id>/', views.delete_user, name='delete_user'),
     
+    
+    # api for the student details form the kobo toolbox
+    path('api/student/create/', views.create_student, name='create_student'),
+    # path('api/student/update/<int:student_id>/', views.update_student, name='update_student'),
+    path('api/student/details/<int:student_id>/', views.student_details, name='student_details'),
+    # path('api/student/delete/<int:student_id>/', views.delete_student, name='delete_student'),
+    
+    
+    # api for the student fee details form the kobo toolbox
+    path('api/student/fee/create/', views.create_student_fee, name='create_student_fee'),
 ]

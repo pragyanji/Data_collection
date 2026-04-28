@@ -6,7 +6,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-from .models import User_Details, Response_table, New_User
+from .models import Student, Student_fee, User_Details, Response_table, New_User
 
 logger = logging.getLogger(__name__)
 
@@ -109,7 +109,10 @@ def show_details(request):
     return render(request, 'show_details.html', {'responses': responses, 'keys': key})
 
 
+
+
 # api to create the user details in the database from the react js frontend
+
 @csrf_exempt
 def create_user(request):
     data = json.loads(request.body)
@@ -148,3 +151,61 @@ def delete_user(request, user_id):
         return JsonResponse({'status': 'success', 'message': f'User with id {user_id} deleted.'}, status=200)
     except New_User.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': f'User with id {user_id} does not exist.'}, status=404)
+    
+    
+    
+    
+    # views for the student details form the kobo toolbox
+@csrf_exempt
+def create_student(request):
+    data = json.loads(request.body)
+    student = Student.objects.create(
+        name=data['name'],
+        stu_id=data['stu_id'],
+        age=data['age'],
+        contact=data['contact'],
+        email=data['email'],
+        parents_name=data['parents_name'],
+        batch=data['batch'],
+        faculty=data['faculty']
+    )
+    return JsonResponse({'status': 'success', 'id': student.id}, status=201)
+
+
+@csrf_exempt
+def create_student_fee(request):
+    data = json.loads(request.body)
+    try:
+        student = Student.objects.get(stu_id=data['stu_id'])
+    except Student.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Student not found'}, status=404)
+    
+    student_fee = Student_fee.objects.create(
+        stu_id=student,
+        semester=data['semester'],
+        fee_amount=data['fee_amount'],
+        payed_amount=data['payed_amount'],
+        due_amount=data['due_amount'],
+        pay_date=data['pay_date']
+    )
+    return JsonResponse({'status': 'success', 'id': student_fee.id}, status=201)
+
+@csrf_exempt
+def student_details(request, student_id):
+    try:
+        student = Student.objects.get(stu_id=student_id)
+        student_fee = Student_fee.objects.filter(stu_id=student)
+        student_data = {
+            'name': student.name,
+            'stu_id': student.stu_id,
+            'age': student.age,
+            'contact': student.contact,
+            'email': student.email,
+            'parents_name': student.parents_name,
+            'batch': student.batch,
+            'faculty': student.faculty,
+            'fees': list(student_fee.values('semester', 'fee_amount', 'payed_amount', 'due_amount', 'pay_date'))
+        }
+        return JsonResponse(student_data, status=200)
+    except Student.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': f'Student with id {student_id} does not exist.'}, status=404)
